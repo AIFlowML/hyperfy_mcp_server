@@ -1,0 +1,95 @@
+# Node.js / npm / yarn / pnpm / bun
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+bun.lockb
+
+# TypeScript
+# *.tsbuildinfo
+# *.js
+# *.js.map
+# *.d.ts
+# Optional: if you only want to commit .ts files and not compiled .js files in source
+# src/**/*.js
+# src/**/*.js.map
+# src/**/*.d.ts
+
+# Build output
+dist/
+build/
+out/
+.next/
+.nuxt/
+# Add any other build output directories your project might use
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Test output
+coverage/
+.nyc_output/
+junit.xml
+TESTS-*.xml
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# IDE / Editor specific
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS specific
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Dependency directories (if not using standard ones)
+jspm_packages/
+typings/
+bower_components/
+
+# Optional: Gatsby cache
+.cache/
+public/
+
+# Optional: Next.js
+.next/
+out/
+
+# Optional: SvelteKit
+.svelte-kit/
+
+# Optional: Docusaurus
+.docusaurus/
+
+# Temporary files
+*.tmp
+*.temp
+*~
+# End Generation Here
+node_modules/
+old_code
+

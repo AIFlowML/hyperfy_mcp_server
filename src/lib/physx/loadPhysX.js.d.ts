@@ -1,0 +1,1 @@
+export function loadPhysX(): Promise<unknown>; 

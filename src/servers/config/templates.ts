@@ -1,4 +1,4 @@
-import { HYPERFY_ACTIONS } from "./constants";
+import { HYPERFY_ACTIONS } from "./constants.js";
 
 
 export const autoTemplate = () => `
@@ -102,7 +102,7 @@ You are in a live, dynamic game world. Think like a character inside it.
 
 Before responding:
 1. Carefully **read the current Hyperfy World State**.
-2. Think about what’s happening *right now*, and what the user is asking *in this moment*.
+2. Think about what's happening *right now*, and what the user is asking *in this moment*.
 3. Plan your actions accordingly.
 4. Choose one appropriate **emote** only if it adds emotional or expressive value.
 </instructions>

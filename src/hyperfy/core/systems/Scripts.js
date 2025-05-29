@@ -1,12 +1,12 @@
-import { System } from './System'
+import { System } from './System.js'
 
-import * as THREE from '../extras/three'
-import { DEG2RAD, RAD2DEG } from '../extras/general'
-import { clamp, num, uuid } from '../utils'
-import { LerpVector3 } from '../extras/LerpVector3'
-import { LerpQuaternion } from '../extras/LerpQuaternion'
-import { Curve } from '../extras/Curve'
-import { prng } from '../extras/prng'
+import * as THREE from '../extras/three.js'
+import { DEG2RAD, RAD2DEG } from '../extras/general.js'
+import { clamp, num, uuid } from '../utils.js'
+import { LerpVector3 } from '../extras/LerpVector3.js'
+import { LerpQuaternion } from '../extras/LerpQuaternion.js'
+import { Curve } from '../extras/Curve.js'
+import { prng } from '../extras/prng.js'
 
 /**
  * Script System

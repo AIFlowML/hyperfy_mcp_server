@@ -1,9 +1,9 @@
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js'
 
-import * as THREE from './three'
-import { DEG2RAD } from './general'
-import { getTrianglesFromGeometry } from './getTrianglesFromGeometry'
-import { getTextureBytesFromMaterial } from './getTextureBytesFromMaterial'
+import * as THREE from './three.js'
+import { DEG2RAD } from './general.js'
+import { getTrianglesFromGeometry } from './getTrianglesFromGeometry.js'
+import { getTextureBytesFromMaterial } from './getTextureBytesFromMaterial.js'
 
 const v1 = new THREE.Vector3()
 const v2 = new THREE.Vector3()

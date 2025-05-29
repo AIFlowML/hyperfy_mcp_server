@@ -5,9 +5,10 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "dev": "ts-node src/server.ts",
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "mkdir -p dist/hyperfy/core dist/lib/physx dist/hyperfy && cp -r src/hyperfy/core/* dist/hyperfy/core/ && cp -r src/lib/physx/* dist/lib/physx/ && cp src/hyperfy/*.json dist/hyperfy/ 2>/dev/null || true",
+    "start": "node dist/index.js",
+    "dev": "node --loader ts-node/esm src/index.ts",
     "test": "vitest",
     "test:all": "vitest run --reporter=verbose",
     "test:all-detailed": "vitest run --reporter=verbose --reporter=json --outputFile=test-results.json",

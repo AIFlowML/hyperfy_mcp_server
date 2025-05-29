@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 
-import { System } from './System'
-import { ControlPriorities } from '../extras/ControlPriorities'
-import { isTouch } from '../../client/utils'
+import { System } from './System.js'
+import { ControlPriorities } from '../extras/ControlPriorities.js'
+import { isTouch } from '../../client/utils.js'
 
 const BATCH_SIZE = 500
 

@@ -1,7 +1,7 @@
-import { App } from '../entities/App'
-import { PlayerLocal } from '../entities/PlayerLocal'
-import { PlayerRemote } from '../entities/PlayerRemote'
-import { System } from './System'
+import { App } from '../entities/App.js'
+import { PlayerLocal } from '../entities/PlayerLocal.js'
+import { PlayerRemote } from '../entities/PlayerRemote.js'
+import { System } from './System.js'
 
 const Types = {
   app: App,

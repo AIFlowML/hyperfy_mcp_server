@@ -1,7 +1,7 @@
-import { bindRotations } from '../extras/bindRotations'
-import { buttons, codeToProp } from '../extras/buttons'
-import * as THREE from '../extras/three'
-import { System } from './System'
+import { bindRotations } from '../extras/bindRotations.js'
+import { buttons, codeToProp } from '../extras/buttons.js'
+import * as THREE from '../extras/three.js'
+import { System } from './System.js'
 
 const LMB = 1 // bitmask
 const RMB = 2 // bitmask

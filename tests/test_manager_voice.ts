@@ -384,10 +384,10 @@ describe('VoiceManager', () => {
       const nullWorldRuntime = createMockRuntime();
       nullWorldRuntime.hyperfyService.getWorld.mockReturnValue(null);
       
-      // This should throw an error during initialization since it tries to access world.livekit
+      // This should throw an error during initialization since world is null
       expect(() => {
         new VoiceManager(nullWorldRuntime as unknown as VoiceManagerRuntime);
-      }).toThrow('Cannot read properties of null');
+      }).toThrow('[VoiceManager] World is not available - cannot initialize voice manager');
       
       logger.info('✅ Null world error handled as expected');
     });

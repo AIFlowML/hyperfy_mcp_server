@@ -1,10 +1,10 @@
 import moment from 'moment'
-import { emoteUrls } from '../extras/playerEmotes'
-import { readPacket, writePacket } from '../packets'
-import { storage } from '../storage'
-import { uuid } from '../utils'
-import { hashFile } from '../utils-client'
-import { System } from './System'
+import { emoteUrls } from '../extras/playerEmotes.js'
+import { readPacket, writePacket } from '../packets.js'
+import { storage } from '../storage.js'
+import { uuid } from '../utils.js'
+import { hashFile } from '../utils-client.js'
+import { System } from './System.js'
 
 /**
  * Client Network System

@@ -27,6 +27,7 @@ export async function hashFileBuffer(buffer: Buffer): Promise<string> {
     return hash
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: speechResponse can be various types from different TTS models
 export async function convertToAudioBuffer(speechResponse: any): Promise<Buffer> {
   if (Buffer.isBuffer(speechResponse)) {
     return speechResponse;
@@ -59,9 +60,9 @@ export async function convertToAudioBuffer(speechResponse: any): Promise<Buffer>
     // Handle Node Readable Stream
     return new Promise<Buffer>((resolve, reject) => {
       const chunks: Buffer[] = [];
-      speechResponse.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+      speechResponse.on('data', (chunk: Buffer | Uint8Array) => chunks.push(Buffer.from(chunk)));
       speechResponse.on('end', () => resolve(Buffer.concat(chunks)));
-      speechResponse.on('error', (err) => reject(err));
+      speechResponse.on('error', (err: Error) => reject(err));
     });
   }
 

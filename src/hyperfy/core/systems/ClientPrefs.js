@@ -1,8 +1,8 @@
 import { isBoolean, isNumber } from 'lodash-es'
 
-import { System } from './System'
-import { storage } from '../storage'
-import { isTouch } from '../../client/utils'
+import { System } from './System.js'
+import { storage } from '../storage.js'
+import { isTouch } from '../../client/utils.js'
 
 /**
  * Client Prefs System

@@ -1,15 +1,15 @@
 import moment from 'moment'
-import * as THREE from '../extras/three'
+import * as THREE from '../extras/three.js'
 import { cloneDeep, isBoolean } from 'lodash-es'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 
-import { System } from './System'
+import { System } from './System.js'
 
-import { hashFile } from '../utils-client'
-import { hasRole, uuid } from '../utils'
-import { ControlPriorities } from '../extras/ControlPriorities'
-import { importApp } from '../extras/appTools'
-import { DEG2RAD, RAD2DEG } from '../extras/general'
+import { hashFile } from '../utils-client.js'
+import { hasRole, uuid } from '../utils.js'
+import { ControlPriorities } from '../extras/ControlPriorities.js'
+import { importApp } from '../extras/appTools.js'
+import { DEG2RAD, RAD2DEG } from '../extras/general.js'
 
 const FORWARD = new THREE.Vector3(0, 0, -1)
 const SNAP_DISTANCE = 1

@@ -1,5 +1,5 @@
-import { createNode } from './createNode'
-import CustomShaderMaterial from '../libs/three-custom-shader-material'
+import { createNode } from './createNode.js'
+import CustomShaderMaterial from '../libs/three-custom-shader-material/index.js'
 
 const groupTypes = ['Scene', 'Group', 'Object3D']
 

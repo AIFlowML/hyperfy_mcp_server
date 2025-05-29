@@ -1,15 +1,15 @@
-import * as THREE from '../extras/three'
+import * as THREE from '../extras/three.js'
 import { isArray, isFunction, isNumber, isString } from 'lodash-es'
 import moment from 'moment'
 
-import { Entity } from './Entity'
-import { createNode } from '../extras/createNode'
-import { LerpVector3 } from '../extras/LerpVector3'
-import { LerpQuaternion } from '../extras/LerpQuaternion'
-import { ControlPriorities } from '../extras/ControlPriorities'
-import { getRef } from '../nodes/Node'
-import { Layers } from '../extras/Layers'
-import { createPlayerProxy } from '../extras/createPlayerProxy'
+import { Entity } from './Entity.js'
+import { createNode } from '../extras/createNode.js'
+import { LerpVector3 } from '../extras/LerpVector3.js'
+import { LerpQuaternion } from '../extras/LerpQuaternion.js'
+import { ControlPriorities } from '../extras/ControlPriorities.js'
+import { getRef } from '../nodes/Node.js'
+import { Layers } from '../extras/Layers.js'
+import { createPlayerProxy } from '../extras/createPlayerProxy.js'
 
 const hotEventNames = ['fixedUpdate', 'update', 'lateUpdate']
 

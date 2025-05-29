@@ -13,6 +13,19 @@ export type { EmoteManagerRuntime } from '../../types/index.js';
 // @ts-ignore: Missing declaration file for JS module, but needed for runtime fallback emotes
 import { Emotes } from '../core/extras/playerEmotes.js'
 
+// Type guards for safe unknown type handling
+function hasEffect(data: unknown): data is { effect?: { emote?: string | null } } {
+  return typeof data === 'object' && data !== null;
+}
+
+function hasMovingProperty(entity: unknown): entity is { moving?: boolean } {
+  return typeof entity === 'object' && entity !== null && 'moving' in entity;
+}
+
+function isPlayerDataWithEffect(data: unknown): data is { effect?: { emote?: string | null } } {
+  return typeof data === 'object' && data !== null;
+}
+
 export class EmoteManager {
   private emoteHashMap: Map<string, string>
   private currentEmoteTimeout: NodeJS.Timeout | null
@@ -104,10 +117,15 @@ export class EmoteManager {
 
     const emoteUrl = hashName.startsWith('asset://') ? hashName : `asset://${hashName}`;
     
-    // Type assertion to extend the player data with effect property
-    const playerData = agentPlayer.data as any;
-    playerData.effect = playerData.effect || {};
-    playerData.effect.emote = emoteUrl;
+    // Use type guard to safely handle unknown player data structure
+    const playerData = agentPlayer.data as unknown;
+    if (hasEffect(playerData)) {
+      playerData.effect = playerData.effect || {};
+      playerData.effect.emote = emoteUrl;
+    } else {
+      console.warn("[Emote] Player data structure incompatible with effects.");
+      return;
+    }
 
     console.info(`[Emote] Playing '${name}' → ${emoteUrl}`);
 
@@ -118,24 +136,23 @@ export class EmoteManager {
     const duration = emoteMeta?.duration || 1.5;
 
     this.movementCheckInterval = setInterval(() => {
-      // Check if player is moving using type assertion
-      const playerWithMoving = agentPlayer as any;
-      if (playerWithMoving.moving) {
+      // Check if player is moving using type guard
+      if (hasMovingProperty(agentPlayer) && agentPlayer.moving) {
         console.info(`[EmoteManager] '${name}' cancelled early due to movement`);
         this.clearEmote(playerData);
       }
     }, 100);
 
     this.currentEmoteTimeout = setTimeout(() => {
-      if (playerData.effect?.emote === emoteUrl) {
+      if (hasEffect(playerData) && playerData.effect?.emote === emoteUrl) {
         console.info(`[EmoteManager] '${name}' finished after ${duration}s`);
         this.clearEmote(playerData);
       }
     }, duration * 1000);
   }
 
-  private clearEmote(playerData: any) {
-    if (playerData?.effect) {
+  private clearEmote(playerData: unknown) {
+    if (isPlayerDataWithEffect(playerData) && playerData.effect) {
       playerData.effect.emote = null;
     }
     this.clearTimers();

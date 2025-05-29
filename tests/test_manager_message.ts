@@ -58,7 +58,7 @@ interface MockWorld {
     };
   };
   chat: {
-    add: MockedFunction<(message: any, broadcast?: boolean) => void>;
+    add: MockedFunction<(message: unknown, broadcast?: boolean) => void>;
   };
 }
 
@@ -79,12 +79,12 @@ interface MockExtendedRuntime {
   agentId: string;
   agentName: string;
   aiModel: string;
-  ensureConnection: MockedFunction<(params: any) => Promise<void>>;
-  createMemory: MockedFunction<(memory: any, tableName: string) => Promise<void>>;
-  getEntityById: MockedFunction<(entityId: string) => Promise<any>>;
-  createEntity: MockedFunction<(entity: any) => Promise<void>>;
-  emitEvent: MockedFunction<(eventType: string, eventData: any) => Promise<void>>;
-  getMemories: MockedFunction<(params: any) => Promise<any[]>>;
+  ensureConnection: MockedFunction<(params: unknown) => Promise<void>>;
+  createMemory: MockedFunction<(memory: unknown, tableName: string) => Promise<void>>;
+  getEntityById: MockedFunction<(entityId: string) => Promise<unknown>>;
+  createEntity: MockedFunction<(entity: unknown) => Promise<void>>;
+  emitEvent: MockedFunction<(eventType: string, eventData: unknown) => Promise<void>>;
+  getMemories: MockedFunction<(params: unknown) => Promise<unknown[]>>;
 }
 
 // Mock console methods
@@ -166,13 +166,13 @@ describe('MessageManager', () => {
     // Reset activity lock
     agentActivityLock.forceReset();
     // Setup mock implementations
-    (generateUUID as any).mockImplementation((runtime: any, seed: string) => `uuid-${seed}-${Date.now()}`);
-    (processMessageWithAI as any).mockResolvedValue({
+    (generateUUID as MockedFunction<typeof generateUUID>).mockImplementation((runtime: unknown, seed: string) => `uuid-${seed}-${Date.now()}`);
+    (processMessageWithAI as MockedFunction<typeof processMessageWithAI>).mockResolvedValue({
       text: 'AI response text',
       emote: 'wave',
       actions: 'HYPERFY_AMBIENT_SPEECH'
     });
-    (formatRelativeTimestamp as any).mockImplementation((timestamp: number) => '2 minutes ago');
+    (formatRelativeTimestamp as MockedFunction<typeof formatRelativeTimestamp>).mockImplementation((timestamp: number) => '2 minutes ago');
     
     // Create fresh mocks
     mockRuntime = createMockRuntime();
@@ -193,7 +193,7 @@ describe('MessageManager', () => {
   describe('Constructor and Initialization', () => {
     it('should initialize with proper runtime context', () => {
       expect(messageManager).toBeInstanceOf(MessageManager);
-      expect((messageManager as any).runtime).toBe(mockRuntime);
+      expect((messageManager as unknown as { runtime: unknown }).runtime).toBe(mockRuntime);
       
       logger.info('✅ MessageManager initialized with runtime context');
     });
@@ -436,7 +436,7 @@ describe('MessageManager', () => {
 
     it('should handle AI processing errors gracefully', async () => {
       // Mock AI processing error
-      (processMessageWithAI as any).mockRejectedValue(new Error('AI processing failed'));
+      (processMessageWithAI as MockedFunction<typeof processMessageWithAI>).mockRejectedValue(new Error('AI processing failed'));
       
       const testMessage = createMockMessage();
       
@@ -553,7 +553,7 @@ describe('MessageManager', () => {
       // Mock world without chat.add function
       const world = mockRuntime.hyperfyService.getWorld();
       if (world) {
-        (world.chat as any).add = 'not-a-function';
+        (world.chat as unknown as { add: unknown }).add = 'not-a-function';
       }
       
       const testText = 'Hello from agent!';
@@ -686,8 +686,8 @@ describe('MessageManager', () => {
   describe('Error Handling and Edge Cases', () => {
     it('should handle null/undefined message gracefully', async () => {
       // Should not throw for null message and should warn
-      await expect(messageManager.handleMessage(null as any)).resolves.not.toThrow();
-      await expect(messageManager.handleMessage(undefined as any)).resolves.not.toThrow();
+      await expect(messageManager.handleMessage(null as unknown as HyperfyMessage)).resolves.not.toThrow();
+      await expect(messageManager.handleMessage(undefined as unknown as HyperfyMessage)).resolves.not.toThrow();
       
       // Should have logged warnings
       expect(consoleSpy.warn).toHaveBeenCalledWith(

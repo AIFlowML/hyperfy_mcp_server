@@ -1,7 +1,7 @@
 import { AccessToken, TrackSource } from 'livekit-server-sdk'
 
-import { System } from './System'
-import { uuid } from '../utils'
+import { System } from './System.js'
+import { uuid } from '../utils.js'
 
 export class ServerLiveKit extends System {
   constructor(world) {

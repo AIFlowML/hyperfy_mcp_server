@@ -1,8 +1,8 @@
-import * as THREE from '../extras/three'
-import { Entity } from './Entity'
-import { createNode } from '../extras/createNode'
-import { LerpQuaternion } from '../extras/LerpQuaternion'
-import { LerpVector3 } from '../extras/LerpVector3'
+import * as THREE from '../extras/three.js'
+import { Entity } from './Entity.js'
+import { createNode } from '../extras/createNode.js'
+import { LerpQuaternion } from '../extras/LerpQuaternion.js'
+import { LerpVector3 } from '../extras/LerpVector3.js'
 
 let capsuleGeometry
 {

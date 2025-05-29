@@ -1,9 +1,9 @@
 import { isBoolean, isNumber, isString } from 'lodash-es'
-import CustomShaderMaterial from '../libs/three-custom-shader-material'
-import * as THREE from '../extras/three'
+import CustomShaderMaterial from '../libs/three-custom-shader-material/index.js'
+import * as THREE from '../extras/three.js'
 
-import { getRef, Node, secureRef } from './Node'
-import { uuid } from '../utils'
+import { getRef, Node, secureRef } from './Node.js'
+import { uuid } from '../utils.js'
 
 const v1 = new THREE.Vector3()
 const v2 = new THREE.Vector3()
@@ -233,7 +233,7 @@ export class Video extends Node {
             // outside coloring (for contain mode)
             if (uFit >= 1.5) {
               const float EPS = 0.005;
-              // decide “outside” based on the *raw* uv
+              // decide "outside" based on the *raw* uv
               bool outside = uv.x < -EPS || uv.x > 1.0 + EPS || uv.y < -EPS || uv.y > 1.0 + EPS;
               if (outside) {
                 col = vec4(uColor, 1.0);

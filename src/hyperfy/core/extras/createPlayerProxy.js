@@ -1,6 +1,6 @@
-import { getRef } from '../nodes/Node'
-import { clamp, hasRole, uuid } from '../utils'
-import * as THREE from './three'
+import { getRef } from '../nodes/Node.js'
+import { clamp, hasRole, uuid } from '../utils.js'
+import * as THREE from './three.js'
 
 const HEALTH_MAX = 100
 

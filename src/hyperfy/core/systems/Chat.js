@@ -1,6 +1,6 @@
 import moment from 'moment'
-import { uuid } from '../utils'
-import { System } from './System'
+import { uuid } from '../utils.js'
+import { System } from './System.js'
 
 /**
  * Chat System

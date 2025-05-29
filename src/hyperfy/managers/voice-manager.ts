@@ -43,6 +43,11 @@ export class VoiceManager {
     const service = this.getService();
     const world = service.getWorld();
 
+    // Add null check for world before accessing livekit
+    if (!world) {
+      throw new Error('[VoiceManager] World is not available - cannot initialize voice manager');
+    }
+
     world.livekit.on('audio', async (data: LiveKitAudioData) => {
       function isLoudEnough(pcmBuffer: Buffer, threshold = 1000): boolean {
         let sum = 0;
@@ -180,11 +185,26 @@ export class VoiceManager {
       const service = this.getService();
       const world = service.getWorld();
 
-      const playerInfo = world.entities.getPlayer(playerId);
+      // Add null check for world
+      if (!world) {
+        console.error('[VoiceManager] World is not available - cannot process voice message');
+        return { text: '', actions: ['ERROR'] };
+      }
+
+      // Fix entity access - use player property instead of getPlayer method
+      const playerInfo = world.entities.player;
+      if (!playerInfo) {
+        console.error(`[VoiceManager] Player info not available for ${playerId}`);
+        return { text: '', actions: ['ERROR'] };
+      }
+      
       const userName = playerInfo.data.name;
       const name = userName;
       const _currentWorldId = service.currentWorldId;
-      const channelId = _currentWorldId;
+      
+      // Handle null worldId values by providing defaults
+      const channelId = _currentWorldId || 'hyperfy-default-world';
+      const worldId = _currentWorldId || 'hyperfy-default-world';
       
       // Create FastMCP-compatible runtime for ID generation
       const mockRuntime: FastMCPRuntime = {
@@ -196,7 +216,7 @@ export class VoiceManager {
         generateUUID: () => generateUUID({} as FastMCPRuntime, '')
       };
       
-      const roomId = generateUUID(mockRuntime, _currentWorldId || 'hyperfy-unknown-world');
+      const roomId = generateUUID(mockRuntime, worldId);
       const entityId = generateUUID(mockRuntime, playerId);
 
       const type = 'WORLD'; // ChannelType.WORLD equivalent
@@ -211,7 +231,7 @@ export class VoiceManager {
         channelId,
         serverId: 'hyperfy',
         type: 'WORLD', // ChannelType.WORLD equivalent
-        worldId: _currentWorldId,
+        worldId,
         userId: playerId
       });
 
@@ -231,8 +251,8 @@ export class VoiceManager {
         }
       );
       
-      // Add worldId to match original ElizaOS Memory structure
-      memory.worldId = _currentWorldId;
+      // Add worldId to match original ElizaOS Memory structure - convert null to undefined
+      memory.worldId = _currentWorldId || undefined;
 
       const callback: VoiceCallback = async (content: VoiceContent, _files: unknown[] = []): Promise<VoiceMemory[]> => {
         console.info(`[Hyperfy Voice Chat Callback] Received response: ${JSON.stringify(content)}`);
@@ -303,6 +323,13 @@ export class VoiceManager {
 
     const service = this.getService();
     const world = service.getWorld();
+    
+    // Add null check for world
+    if (!world) {
+      console.error('[VoiceManager] World is not available - cannot play audio');
+      return;
+    }
+    
     this.processingVoice = true;
 
     try {

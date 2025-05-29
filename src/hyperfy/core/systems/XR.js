@@ -1,5 +1,5 @@
-import { System } from './System'
-import * as THREE from '../extras/three'
+import { System } from './System.js'
+import * as THREE from '../extras/three.js'
 import { XRControllerModelFactory } from 'three/addons'
 
 const UP = new THREE.Vector3(0, 1, 0)

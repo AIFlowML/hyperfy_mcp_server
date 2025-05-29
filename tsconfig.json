@@ -18,6 +18,8 @@
     "noEmitOnError": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "allowJs": true,
+    "checkJs": false,
     "lib": ["ES2020", "DOM"]
   },
   "include": [
@@ -27,6 +29,8 @@
     "node_modules",
     "dist",
     "**/*.test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "src/hyperfy/core/**/*.js",
+    "src/lib/physx/**/*.js"
   ]
 } 

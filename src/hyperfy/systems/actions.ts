@@ -4,6 +4,7 @@ import type * as THREE from 'three';
 interface ActionNode extends THREE.Object3D {
   [key: string]: unknown;
   finished?: boolean;
+  _label?: string;
   ctx: {
     entity: {
       root: {
@@ -11,6 +12,9 @@ interface ActionNode extends THREE.Object3D {
       };
       data?: {
         id: string;
+      };
+      blueprint?: {
+        name?: string;
       };
     };
   };
@@ -172,4 +176,9 @@ export class AgentActions extends System {
   postLateUpdate() {}
   commit() {}
   postTick() {}
+
+  // Public getter for currentNode
+  getCurrentNode(): ActionNode | null {
+    return this.currentNode;
+  }
 }

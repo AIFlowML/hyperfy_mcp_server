@@ -61,6 +61,13 @@ export class MessageManager {
     await agentActivityLock.run(async () => {
       const service = this.getService();
       const world = service.getWorld();
+      
+      // Add null safety checks for world and player
+      if (!world || !world.entities?.player) {
+        console.warn('[MessageManager] World or player entity not available, cannot process message');
+        return;
+      }
+      
       const agentPlayerId = world.entities.player.data.id;
       const senderName = msg.from || 'System';
       const messageBody = msg.body || '';
@@ -94,7 +101,7 @@ export class MessageManager {
           userName: senderName,
           name: senderName,
           source: 'hyperfy',
-          channelId: service.currentWorldId,
+          channelId: service.currentWorldId || 'hyperfy-unknown-world', // Fix null safety
           serverId: 'hyperfy',
           type: 'WORLD', // ChannelType.WORLD equivalent
           worldId: hyperfyWorldId,
@@ -248,6 +255,7 @@ export class MessageManager {
 
       world.chat.add(
         {
+          id: `chat-${Date.now()}-${agentPlayerId}`, // Simple unique id generation
           body: text,
           fromId: agentPlayerId,
           from: agentPlayerName,

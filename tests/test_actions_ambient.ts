@@ -328,9 +328,9 @@ describe('Ambient Speech Tool', () => {
     });
 
     it('should handle different context types', async () => {
-      // Test exploration context
+      // Test exploration context - no content provided to trigger contextual generation
       const exploreResult = await ambientTool.execute(
-        { context: 'exploring new areas' } as Parameters<typeof ambientTool.execute>[0],
+        { context: 'exploring new areas', forceGenerate: true } as Parameters<typeof ambientTool.execute>[0],
         mockContext
       );
       const exploreData = exploreResult.data as AmbientResponseData;
@@ -338,9 +338,9 @@ describe('Ambient Speech Tool', () => {
       expect(exploreData.thought).toBeDefined();
       expect(typeof exploreData.thought).toBe('string');
 
-      // Test peaceful context
+      // Test peaceful context - no content provided to trigger contextual generation
       const peacefulResult = await ambientTool.execute(
-        { context: 'quiet peaceful moment' } as Parameters<typeof ambientTool.execute>[0],
+        { context: 'quiet peaceful moment', forceGenerate: true } as Parameters<typeof ambientTool.execute>[0],
         mockContext
       );
       const peacefulData = peacefulResult.data as AmbientResponseData;
@@ -348,9 +348,9 @@ describe('Ambient Speech Tool', () => {
       expect(peacefulData.thought).toBeDefined();
       expect(typeof peacefulData.thought).toBe('string');
 
-      // Test general context
+      // Test general context - no content provided to trigger contextual generation
       const generalResult = await ambientTool.execute(
-        { context: 'general observation' } as Parameters<typeof ambientTool.execute>[0],
+        { context: 'general observation', forceGenerate: true } as Parameters<typeof ambientTool.execute>[0],
         mockContext
       );
       const generalData = generalResult.data as AmbientResponseData;
@@ -649,6 +649,7 @@ describe('Ambient Speech Tool', () => {
       expect(result.success).toBe(false);
       expect(result.error).toBe('ambient_speech_failed');
       expect(result.message).toContain('Failed to perform ambient speech');
+      expect(result.message).toContain('Logging error');
       
       logger.info('✅ Execution error handling validated');
     });
@@ -775,8 +776,15 @@ describe('Ambient Speech Tool', () => {
       };
 
       const args = { content: 'Error logging test' };
-      await ambientTool.execute(args, errorContext);
+      const result = await ambientTool.execute(args, errorContext);
 
+      // Should return error result, not throw
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('ambient_speech_failed');
+      expect(result.message).toContain('Failed to perform ambient speech');
+      expect(result.message).toContain('Test error');
+
+      // Should have called error logging
       expect(errorContext.log.error).toHaveBeenCalledWith(
         'Error performing ambient speech',
         expect.objectContaining({

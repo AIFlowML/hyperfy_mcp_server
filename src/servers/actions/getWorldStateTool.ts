@@ -180,7 +180,7 @@ The tool returns both structured data for programmatic use and formatted text fo
       // Process nearby actions and interactables
       const actionsSystem = world?.actions;
       const nearbyActions = actionsSystem?.getNearby(actionRadius) || [];
-      const currentAction = actionsSystem?.currentNode;
+      const currentAction = actionsSystem?.getCurrentNode();
 
       const actionLines: string[] = [];
       const structuredActions: Array<{

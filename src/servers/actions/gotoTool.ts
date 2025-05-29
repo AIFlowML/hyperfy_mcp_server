@@ -200,10 +200,55 @@ Agent: "Located mysterious orb, navigating there..."`,
           // For now, we'll use fallback entity matching based on description
           if (targetDescription) {
             const searchTerm = targetDescription.toLowerCase();
-            const matchingEntityId = limitedEntityIds.find((id) => {
+            log.info('Searching for entity with description', { searchTerm, availableEntities: limitedEntityIds.length });
+            
+            // Try multiple matching strategies
+            let matchingEntityId = null;
+            
+            // Strategy 1: Exact name match
+            matchingEntityId = limitedEntityIds.find((id) => {
               const name = service.getEntityName(id)?.toLowerCase() || '';
-              return name.includes(searchTerm) || id.toLowerCase().includes(searchTerm);
+              return name === searchTerm;
             });
+            
+            // Strategy 2: Name contains search term
+            if (!matchingEntityId) {
+              matchingEntityId = limitedEntityIds.find((id) => {
+                const name = service.getEntityName(id)?.toLowerCase() || '';
+                return name.includes(searchTerm);
+              });
+            }
+            
+            // Strategy 3: Search term contains name (for partial matches)
+            if (!matchingEntityId) {
+              matchingEntityId = limitedEntityIds.find((id) => {
+                const name = service.getEntityName(id)?.toLowerCase() || '';
+                return name.length > 0 && searchTerm.includes(name);
+              });
+            }
+            
+            // Strategy 4: Word-by-word matching
+            if (!matchingEntityId) {
+              const searchWords = searchTerm.split(/\s+/);
+              matchingEntityId = limitedEntityIds.find((id) => {
+                const name = service.getEntityName(id)?.toLowerCase() || '';
+                const nameWords = name.split(/\s+/);
+                
+                // Check if any search word matches any name word
+                return searchWords.some(searchWord => 
+                  nameWords.some(nameWord => 
+                    nameWord.includes(searchWord) || searchWord.includes(nameWord)
+                  )
+                );
+              });
+            }
+            
+            // Strategy 5: ID contains search term
+            if (!matchingEntityId) {
+              matchingEntityId = limitedEntityIds.find((id) => {
+                return id.toLowerCase().includes(searchTerm);
+              });
+            }
             
             if (matchingEntityId) {
               targetEntityId = matchingEntityId;
@@ -211,6 +256,15 @@ Agent: "Located mysterious orb, navigating there..."`,
                 targetDescription, 
                 matchedEntityId: targetEntityId,
                 matchedName: service.getEntityName(targetEntityId) || 'Unknown'
+              });
+            } else {
+              log.warn('No matching entity found for description', { 
+                targetDescription, 
+                searchTerm,
+                availableEntities: limitedEntityIds.map(id => ({
+                  id,
+                  name: service.getEntityName(id)
+                }))
               });
             }
           }
@@ -244,7 +298,7 @@ Agent: "Located mysterious orb, navigating there..."`,
           success: false,
           message: errorMsg,
           error: 'entity_not_found',
-          data: { targetEntityId }
+          data: { targetEntityId: targetEntityId }
         };
       }
 
@@ -302,7 +356,7 @@ Agent: "Located mysterious orb, navigating there..."`,
           entityId: targetEntityId,
           targetName,
           navigationId,
-          targetPosition: targetPosition.toArray(),
+          targetPosition: [targetPosition.x, targetPosition.y || 0, targetPosition.z],
           timestamp: new Date().toISOString(),
           worldId: sessionData.worldId,
           userId: sessionData.userId,

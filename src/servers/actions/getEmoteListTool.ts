@@ -49,9 +49,9 @@ This information helps the agent choose appropriate emotes for different situati
     const { format = 'both' } = args;
     const { log, session } = context;
 
-    log.info('Executing hyperfy_get_emote_list', { format, totalEmotes: EMOTES_LIST.length });
-
     try {
+      log.info('Executing hyperfy_get_emote_list', { format, totalEmotes: EMOTES_LIST.length });
+
       // Format emotes as markdown text (same as original provider)
       const emoteListText = EMOTES_LIST.map(
         (e) => `- **${e.name}**: ${e.description}`

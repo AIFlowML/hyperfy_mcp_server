@@ -159,11 +159,12 @@ describe('MessageManager', () => {
     vi.useFakeTimers();
     
     // Reset console spies
-    Object.values(consoleSpy).forEach(spy => spy.mockClear());
+    for (const spy of Object.values(consoleSpy)) {
+      spy.mockClear();
+    }
     
     // Reset activity lock
     agentActivityLock.forceReset();
-    
     // Setup mock implementations
     (generateUUID as any).mockImplementation((runtime: any, seed: string) => `uuid-${seed}-${Date.now()}`);
     (processMessageWithAI as any).mockResolvedValue({
@@ -473,6 +474,7 @@ describe('MessageManager', () => {
       const world = mockRuntime.hyperfyService.getWorld();
       expect(world?.chat.add).toHaveBeenCalledWith(
         {
+          id: expect.stringMatching(/^chat-\d+-agent-player-123$/), // Expect the generated id
           body: testText,
           fromId: 'agent-player-123',
           from: 'TestAgent',

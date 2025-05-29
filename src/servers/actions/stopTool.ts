@@ -114,7 +114,9 @@ Stop Effectiveness:
 
     // Process the stop reason using helper
     const processedReason = processStopReason(rawReason);
-    const finalReason = urgent ? `${processedReason} (urgent)` : processedReason;
+    const finalReason = urgent && !processedReason.includes('(urgent)') 
+      ? `${processedReason} (urgent)` 
+      : processedReason;
 
     log.info('Executing hyperfy_stop_moving', {
       reason: finalReason,

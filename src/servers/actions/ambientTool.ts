@@ -100,13 +100,13 @@ The agent will use current world context, recent interactions, and environmental
     const { log, session } = context;
     const { hyperfyService, playerState, userId } = session.data;
 
-    log.info('Executing hyperfy_ambient_speech', {
-      hasContent: !!content,
-      hasContext: !!additionalContext,
-      forceGenerate
-    });
-
     try {
+      log.info('Executing hyperfy_ambient_speech', {
+        hasContent: !!content,
+        hasContext: !!additionalContext,
+        forceGenerate
+      });
+
       // Use session data to track recent ambient speech (prevent spam)
       const sessionData = session.data as McpSessionData & { 
         lastAmbientSpeech?: number;

@@ -24,6 +24,9 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:final": "echo '🧪 Running comprehensive test suite...' && vitest run --reporter=verbose && echo '✅ All tests completed!'",
+    "test:esm-mcp": "echo '🔍 Running ESM Import & MCP Session Tests...' && node tests/test-esm-imports.js && echo '' && node tests/test-mcp-session.js",
+    "test:mcp-tools": "echo '🛠️  Running comprehensive MCP tools test...' && node tests/test-mcp-tools.js",
+    "test:full-integration": "echo '🚀 Running full integration test suite...' && npm run test:esm-mcp && echo '' && npm run test:mcp-tools",
     "debug:ws": "node tests/debug/ws-connection-test.js",
     "debug:hyperfy": "node tests/debug/hyperfy-connection-test.js"
   },

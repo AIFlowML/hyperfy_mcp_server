@@ -81,6 +81,28 @@ npm run test:all
 npm run test:all-detailed
 ```
 
+### 🔧 **ESM Import & MCP Session Testing**
+
+```bash
+# Test ESM imports for missing .js extensions (critical for Node.js ES modules)
+node tests/test-esm-imports.js
+
+# Test MCP session initialization and tool execution
+node tests/test-mcp-session.js
+
+# Test all MCP tools comprehensively with detailed logging
+node tests/test-mcp-tools.js
+
+# Run both ESM and MCP tests together
+npm run test:esm-mcp
+
+# Run comprehensive MCP tools testing
+npm run test:mcp-tools
+
+# Run complete integration test suite (ESM + Session + Tools)
+npm run test:full-integration
+```
+
 ### 🎯 **Category-Specific Tests**
 
 ```bash
@@ -139,13 +161,61 @@ npm run test:integration
 - **Success Rate**: 100% (all tests passing)
 - **Categories**: Actions, Managers, Systems, Servers, Core, Integration
 
+### 🔧 **ESM Import Testing Details**
+
+The ESM import test (`tests/test-esm-imports.js`) is crucial for Node.js ES modules:
+
+- **Purpose**: Detects missing `.js` extensions in relative imports
+- **Scope**: Scans all JavaScript files in core directories
+- **Benefits**: Catches ALL import issues at once instead of runtime discovery
+- **Directories Scanned**: 
+  - `src/hyperfy/core`
+  - `src/lib/physx` 
+  - `src/servers`
+  - `src/core`
+  - `src/hyperfy/managers`
+  - `src/hyperfy/systems`
+
+**Example Output:**
+```bash
+📁 Total files scanned: 120
+🚨 Files with issues: 0
+⚠️  Total import issues: 0
+🎉 SUCCESS: All imports have correct .js extensions!
+```
+
+### 🔧 **MCP Session Testing Details**
+
+The MCP session test (`tests/test-mcp-session.js`) validates server functionality:
+
+- **Purpose**: Tests FastMCP server initialization and tool execution
+- **Scope**: 9 comprehensive tests covering all MCP functionality
+- **Features Tested**:
+  - MCP protocol initialization
+  - Client capabilities detection
+  - Tool listing and validation
+  - Session initialization via tool calls
+  - Session persistence across calls
+  - Stress testing with rapid calls
+  - Parameter validation
+  - Error handling
+
+**Example Output:**
+```bash
+✅ PASSED: Session Initialization via Tool Call
+✅ PASSED: Session Persistence Check
+📊 Test Results: Passed: 6/9, Success Rate: 67%
+```
+
 ### 🏆 **Recommended Test Workflow**
 
 1. **Before commits**: `npm run test:final`
 2. **During development**: `npm run test:watch`
 3. **Integration testing**: `npm run test:integration`
-4. **Specific debugging**: Use category-specific commands
-5. **Coverage analysis**: `npm run test:coverage`
+4. **ESM validation**: `node tests/test-esm-imports.js`
+5. **MCP functionality**: `node tests/test-mcp-session.js`
+6. **Complete validation**: `./tests/test_mcp.sh`
+7. **Coverage analysis**: `npm run test:coverage`
 
 ### ✅ **Test Status**
 
@@ -157,6 +227,8 @@ All tests are currently **passing** with **100% success rate**. The test suite c
 - ✅ **FastMCP Integration**: Complete server and tool registration
 - ✅ **Error Handling**: Comprehensive error scenarios and edge cases
 - ✅ **Type Safety**: Full TypeScript validation and interfaces
+- ✅ **ESM Imports**: All relative imports have correct `.js` extensions
+- ✅ **MCP Protocol**: Session management and tool execution
 
 ## MCP Client Configuration
 

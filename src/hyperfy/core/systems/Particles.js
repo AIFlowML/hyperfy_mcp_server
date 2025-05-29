@@ -1,6 +1,6 @@
 import { System } from './System.js'
 import * as THREE from '../extras/three.js'
-import CustomShaderMaterial from '../libs/three-custom-shader-material.js'
+import CustomShaderMaterial from '../libs/three-custom-shader-material/index.js'
 import { DEG2RAD } from '../extras/general.js'
 import { uuid } from '../utils.js'
 

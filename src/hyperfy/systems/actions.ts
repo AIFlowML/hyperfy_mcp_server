@@ -98,6 +98,16 @@ export class AgentActions extends System {
 
     const world = this.world as WorldType;
     const control = world.controls;
+    
+    // Check if controls exist before using them
+    if (!control) {
+      console.log('No controls available - cannot perform action');
+      return;
+    }
+    
+    // Set current node immediately to prevent concurrent actions
+    this.currentNode = target;
+    
     control.setKey('keyE', true);
 
     setTimeout(() => {
@@ -105,7 +115,7 @@ export class AgentActions extends System {
         target._onTrigger({ playerId: world.entities.player.data.id });
       }
       control.setKey('keyE', false);
-      this.currentNode = target;
+      // currentNode is already set above
     }, target._duration ?? 3000);
 
   }
@@ -120,6 +130,18 @@ export class AgentActions extends System {
     console.log('Releasing current action.');
     const world = this.world as WorldType;
     const control = world.controls;
+    
+    // Check if controls exist before using them
+    if (!control) {
+      console.log('No controls available - releasing action without key input');
+      // Still call onCancel and reset currentNode
+      if (typeof this.currentNode._onCancel === 'function') {
+        this.currentNode._onCancel();
+      }
+      this.currentNode = null;
+      return;
+    }
+    
     control.setKey('keyX', true);
     control.keyX.pressed = true;
     control.keyX.onPress?.();

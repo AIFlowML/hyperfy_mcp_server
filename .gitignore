@@ -92,4 +92,5 @@ out/
 # End Generation Here
 node_modules/
 old_code
-
+to_move/
+/Users/ilessio/dev-agents/PROJECTS/hyperfy-mcp/hyperfy-fastmcp-server/to_move

@@ -62,7 +62,7 @@ export class BehaviorManager {
       try {
         await this.executeBehavior();
       } catch (error) {
-        this.logger.error("[BehaviorManager] Error in behavior:", error);
+        this.logger.error("[BehaviorManager] Error executing behavior:", error);
       }
 
       // Short delay between behaviors
@@ -71,8 +71,8 @@ export class BehaviorManager {
     }
   }
 
-  private getService(): HyperfyService {
-    return this.runtime.hyperfyService as HyperfyService;
+  private getService(): HyperfyService | null {
+    return this.runtime.hyperfyService as HyperfyService | null;
   }
 
   /**
@@ -87,10 +87,15 @@ export class BehaviorManager {
     }
 
     const service = this.getService();
+    if (!service) {
+      this.logger.warn("[BehaviorManager] Service not available, skipping behavior");
+      return;
+    }
+    
     const world = service.getWorld();
     const _currentWorldId = service.currentWorldId;
     
-    if (!service || !service.isConnected() || !world) {
+    if (!service.isConnected() || !world) {
       this.logger.warn("[BehaviorManager] Service not ready, skipping behavior");
       return;
     }

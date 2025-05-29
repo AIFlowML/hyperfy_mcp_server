@@ -52,6 +52,12 @@ export class MessageManager {
   }
 
   async handleMessage(msg: HyperfyMessage): Promise<void> {
+    // Add null safety check
+    if (!msg) {
+      console.warn('[MessageManager] Received null or undefined message, ignoring');
+      return;
+    }
+
     await agentActivityLock.run(async () => {
       const service = this.getService();
       const world = service.getWorld();
@@ -180,15 +186,11 @@ export class MessageManager {
 
         // Emit the MESSAGE_RECEIVED event to trigger the message handler
         console.info(`[Hyperfy Chat] Emitting MESSAGE_RECEIVED event for message: ${messageId}`);
-        agentActivityLock.enter();
         await this.runtime.emitEvent('MESSAGE_RECEIVED', {
             runtime: this.runtime,
             message: memory,
             callback: callback,
-            source: 'hyperfy',
-            onComplete: () => {
-              agentActivityLock.exit();
-            }
+            source: 'hyperfy'
           },
         );
 

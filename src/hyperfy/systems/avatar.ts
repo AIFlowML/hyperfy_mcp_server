@@ -1,9 +1,6 @@
-// OPTION 1: Restore lodash-es (uncomment the line below and install @types/lodash-es)
-// import { isString } from 'lodash-es'
-
-// OPTION 2: Use native replacement (current approach - no extra dependencies)
 import { Node } from '../core/nodes/Node.js'
 import * as THREE from 'three'
+import type { AvatarFactory, AvatarInstance } from '../../types/index.js'
 
 // Native JavaScript replacement for lodash isString (remove if using Option 1)
 const isString = (value: unknown): value is string => typeof value === 'string';
@@ -13,6 +10,9 @@ interface ExtendedNode extends Node {
   name: string;
   ctx: {
     world: {
+      stage: {
+        dirtyNodes: Set<Node>;
+      };
       loader: {
         get(type: string, url: string): LoadedAvatar | undefined;
         load(type: string, url: string): Promise<LoadedAvatar | undefined>;
@@ -51,24 +51,6 @@ const defaults = {
   onLoad: null as (() => void) | null,
 }
 
-type AvatarFactory = {
-  create: (
-    matrixWorld: THREE.Matrix4,
-    hooks: unknown,
-    avatarNode: AgentAvatar
-  ) => AvatarInstance
-  applyStats?: (stats: unknown) => void
-}
-
-type AvatarInstance = {
-  move: (matrixWorld: THREE.Matrix4) => void
-  destroy: () => void
-  setEmote: (emote: string | null) => void
-  height?: number
-  headToHeight?: number
-  // getBoneTransform?: (boneName: string) => THREE.Matrix4
-}
-
 export class AgentAvatar extends Node {
   private _src: string | null = defaults.src
   private _emote: string | null = defaults.emote
@@ -79,6 +61,7 @@ export class AgentAvatar extends Node {
   public instance: AvatarInstance | null = null
   private n = 0
   private needsRebuild = false
+  private isLoading = false
 
   constructor(data: Partial<{
     id: string
@@ -101,22 +84,54 @@ export class AgentAvatar extends Node {
 
   async mount() {
     this.needsRebuild = false
+    
+    // Prevent concurrent loading
+    if (this.isLoading) return
+    
     if (this._src) {
       const n = ++this.n
       const ctx = (this as unknown as ExtendedNode).ctx
-      let avatar = ctx?.world.loader?.get('avatar', this._src)
-      if (!avatar) avatar = await ctx?.world.loader?.load('avatar', this._src)
-      if (this.n !== n) return
-      this.factory = avatar?.factory ?? null
-      this.hooks = avatar?.hooks ?? null
+      
+      if (!ctx?.world?.loader) {
+        console.warn('[avatar] No loader available in world context')
+        return
+      }
+      
+      try {
+        this.isLoading = true
+        let avatar = ctx.world.loader.get('avatar', this._src)
+        
+        if (!avatar) {
+          avatar = await ctx.world.loader.load('avatar', this._src)
+        }
+        
+        // Check if this mount operation is still valid
+        if (this.n !== n) return
+        
+        this.factory = avatar?.factory ?? null
+        this.hooks = avatar?.hooks ?? null
+      } catch (error) {
+        console.warn('[avatar] Failed to load avatar:', error)
+        this.factory = null
+        this.hooks = null
+        return
+      } finally {
+        this.isLoading = false
+      }
     }
+    
     if (this.factory) {
-      const matrixWorld = (this as unknown as ExtendedNode).matrixWorld
-      this.instance = this.factory.create(matrixWorld, this.hooks, this)
-      this.instance.setEmote(this._emote)
-      const ctx = (this as unknown as ExtendedNode).ctx
-      ctx?.world?.setHot?.(this.instance, true)
-      this._onLoad?.()
+      try {
+        const matrixWorld = (this as unknown as ExtendedNode).matrixWorld
+        this.instance = this.factory.create(matrixWorld, this.hooks, this)
+        this.instance.setEmote(this._emote)
+        const ctx = (this as unknown as ExtendedNode).ctx
+        ctx?.world?.setHot?.(this.instance, true)
+        this._onLoad?.()
+      } catch (error) {
+        console.warn('[avatar] Failed to create avatar instance:', error)
+        this.instance = null
+      }
     }
   }
 

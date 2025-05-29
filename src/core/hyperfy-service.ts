@@ -233,26 +233,30 @@ export class HyperfyService {
 
       // HACK: Overwriting `chat.add` to prevent crashes caused by the original implementation.
       // This ensures safe handling of chat messages and avoids unexpected errors from undefined fields.
-      world.chat.add = (msg: ChatMessage, broadcast?: boolean) => {
-        const chat = world.chat
-        const MAX_MSGS = 50
-        
-        chat.msgs = [...chat.msgs, msg]
+      if (world.chat) {
+        world.chat.add = (msg: ChatMessage, broadcast?: boolean) => {
+          const chat = world.chat
+          const MAX_MSGS = 50
+          
+          chat.msgs = [...chat.msgs, msg]
 
-        if (chat.msgs.length > MAX_MSGS) {
-          chat.msgs.shift()
-        }
-        for (const callback of chat.listeners) {
-          callback(chat.msgs)
-        }
+          if (chat.msgs.length > MAX_MSGS) {
+            chat.msgs.shift()
+          }
+          for (const callback of chat.listeners) {
+            callback(chat.msgs)
+          }
 
-        // emit chat event
-        const readOnly = Object.freeze({ ...msg })
-        this.world?.events.emit('chat', readOnly)
-        // maybe broadcast
-        if (broadcast) {
-          this.world?.network.send('chatAdded', msg)
+          // emit chat event
+          const readOnly = Object.freeze({ ...msg })
+          this.world?.events.emit('chat', readOnly)
+          // maybe broadcast
+          if (broadcast) {
+            this.world?.network.send('chatAdded', msg)
+          }
         }
+      } else {
+        console.warn('[Hyperfy Service] Chat system not available - skipping chat.add override')
       }
 
       const mockElement = {
@@ -622,6 +626,7 @@ export class HyperfyService {
       this.controls = null
       this.playerNamesMap.clear()
       this.wsUrl = null
+      this._currentWorldId = null // Reset current world ID
       this.appearanceSet = false
 
       this.processedMsgIds.clear()

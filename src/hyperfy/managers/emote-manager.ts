@@ -96,6 +96,12 @@ export class EmoteManager {
       return;
     }
 
+    // Add null safety check for player data
+    if (!agentPlayer.data) {
+      console.warn("[Emote] Player data not available.");
+      return;
+    }
+
     const emoteUrl = hashName.startsWith('asset://') ? hashName : `asset://${hashName}`;
     
     // Type assertion to extend the player data with effect property

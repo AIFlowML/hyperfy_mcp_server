@@ -146,6 +146,10 @@ export class AgentControls extends System {
       (this as DynamicKeyAccess)[key] = createButtonState();
     }
 
+    // Ensure XR sticks are properly initialized
+    this.xrLeftStick = { value: { x: 0, y: 0, z: 0 } };
+    this.xrRightStick = { value: { x: 0, y: 0, z: 0 } };
+
     this.camera = this.createCamera(this);
   }
 
@@ -207,6 +211,7 @@ export class AgentControls extends System {
     const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
     const token = new NavigationToken();
     this._currentWalkToken = token;
+    
     const walkLoop = async () => {
       const startTime = Date.now();
 
@@ -241,7 +246,8 @@ export class AgentControls extends System {
       }
     };
 
-    walkLoop();
+    // Await the walkLoop to ensure the promise doesn't resolve immediately
+    await walkLoop();
   }
 
   /**

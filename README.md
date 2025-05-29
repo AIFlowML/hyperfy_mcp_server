@@ -2,6 +2,8 @@
 
 A Model Context Protocol (MCP) server for interacting with Hyperfy 3D virtual worlds, built with FastMCP and TypeScript.
 
+![Hyperfy FastMCP Server Overview](assets/overview.png)
+
 ## Features
 
 - **Chat Communication**: Send messages in Hyperfy worlds

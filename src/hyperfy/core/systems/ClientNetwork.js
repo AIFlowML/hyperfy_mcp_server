@@ -227,9 +227,29 @@ export class ClientNetwork extends System {
         if (this.ws.readyState === WebSocket.OPEN) {
           this.ws.close()
         } else if (this.ws.readyState === WebSocket.CONNECTING) {
-          // For connecting state, we need to wait for the connection to open or error
-          // before we can safely close it, or force terminate it
-          this.ws.terminate ? this.ws.terminate() : this.ws.close()
+          // For connecting state, add error handler to prevent uncaught exceptions
+          const handleConnectionError = () => {
+            // Connection will be closed, no action needed
+          };
+          
+          this.ws.addEventListener('error', handleConnectionError, { once: true });
+          this.ws.addEventListener('open', () => {
+            this.ws.removeEventListener('error', handleConnectionError);
+            this.ws.close();
+          }, { once: true });
+          
+          // Try to terminate if available, but catch any errors
+          if (this.ws.terminate) {
+            try {
+              this.ws.terminate();
+            } catch (terminateError) {
+              // Ignore terminate errors - connection will close naturally
+            }
+          }
+        } else if (this.ws.readyState === WebSocket.CLOSING) {
+          // Already closing, just wait
+        } else if (this.ws.readyState === WebSocket.CLOSED) {
+          // Already closed, nothing to do
         }
       } catch (error) {
         // Silently handle WebSocket close errors during cleanup

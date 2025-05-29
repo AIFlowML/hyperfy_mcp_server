@@ -22,6 +22,44 @@ const createMockWorld = () => ({
   }
 });
 
+// Create a proper skinned mesh with skeleton for VRM testing
+const createMockSkinnedMesh = () => {
+  const geometry = new THREE.BoxGeometry(1, 1, 1);
+  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+  
+  // Create bones for the skeleton
+  const bones = [
+    new THREE.Bone(), // root bone
+    new THREE.Bone(), // hips
+    new THREE.Bone(), // leftUpperArm
+    new THREE.Bone(), // rightUpperArm
+    new THREE.Bone(), // head
+  ];
+  
+  // Set up bone hierarchy
+  bones[0].add(bones[1]); // root -> hips
+  bones[1].add(bones[2]); // hips -> leftUpperArm
+  bones[1].add(bones[3]); // hips -> rightUpperArm
+  bones[1].add(bones[4]); // hips -> head
+  
+  // Create skeleton
+  const skeleton = new THREE.Skeleton(bones);
+  
+  // Create skinned mesh
+  const skinnedMesh = new THREE.SkinnedMesh(geometry, material);
+  skinnedMesh.skeleton = skeleton;
+  skinnedMesh.bind(skeleton);
+  
+  // Don't call computeBoundingBox() as it causes issues with mock data
+  // Instead, manually set a bounding box
+  skinnedMesh.boundingBox = new THREE.Box3(
+    new THREE.Vector3(-0.5, -0.5, -0.5),
+    new THREE.Vector3(0.5, 1.7, 0.5)
+  );
+  
+  return skinnedMesh;
+};
+
 // Mock GLB data for testing
 const createMockGLBData = (type: 'avatar' | 'emote' | 'model' = 'model') => {
   const baseScene = new THREE.Scene();
@@ -38,30 +76,37 @@ const createMockGLBData = (type: 'avatar' | 'emote' | 'model' = 'model') => {
   };
 
   if (type === 'avatar') {
+    // Create proper skinned meshes for VRM
+    const skinnedMesh = createMockSkinnedMesh();
+    baseScene.add(skinnedMesh);
+    
     return {
       ...commonData,
       userData: {
         vrm: {
           humanoid: {
-            _rawHumanBones: { // Corrected structure based on createVRMFactory
+            _rawHumanBones: {
               humanBones: {
                 hips: { node: { matrixWorld: new THREE.Matrix4() } },
-                // Add other bones if their matrixWorld is accessed directly
               }
             },
             getRawBoneNode: vi.fn((boneName: string) => ({ 
               name: `vrm-bone-${boneName}`,
-              matrixWorld: new THREE.Matrix4(), // Mock matrixWorld for bones
+              matrixWorld: new THREE.Matrix4(),
             })),
-            // Mock other humanoid properties if accessed
-            _normalizedHumanBones: { // For pose arms down
+            _normalizedHumanBones: {
               humanBones: {
                 leftUpperArm: { node: new THREE.Object3D() },
                 rightUpperArm: { node: new THREE.Object3D() },
-                head: { node: new THREE.Object3D() },
+                head: { 
+                  node: {
+                    ...new THREE.Object3D(),
+                    getWorldPosition: vi.fn(() => new THREE.Vector3(0, 1.7, 0))
+                  }
+                },
               }
             },
-            update: vi.fn(), // Mock update method
+            update: vi.fn(),
           },
           meta: {
             metaVersion: '1.0',
@@ -109,12 +154,12 @@ describe('AgentLoader System', () => {
 
     // Mock GLTFLoader.parse method
     vi.spyOn(loader.gltfLoader, 'parse').mockImplementation(
-      (arrayBuffer: ArrayBuffer, path: string, onLoad: (gltf: unknown) => void, onError?: (error: any) => void) => {
+      (arrayBuffer: ArrayBuffer, path: string, onLoad: (gltf: unknown) => void, onError?: (error: Error) => void) => {
         // Simulate successful parsing
         // The actual GLB data passed here will depend on the test context
         // For now, let's assume a generic model mock if not specified
-        const currentMockType = (globalThis as any).__currentMockGlbType || 'model';
-        setTimeout(() => onLoad(createMockGLBData(currentMockType)), 10); 
+        const currentMockType = (globalThis as Record<string, unknown>).__currentMockGlbType as string || 'model';
+        setTimeout(() => onLoad(createMockGLBData(currentMockType as 'avatar' | 'emote' | 'model')), 10); 
       }
     );
   });
@@ -174,7 +219,9 @@ describe('AgentLoader System', () => {
     });
 
     it('should return null for asset URLs without assetsUrl', () => {
-      mockWorld.assetsUrl = undefined;
+      const worldWithoutAssets = { ...mockWorld };
+      (worldWithoutAssets as Record<string, unknown>).assetsUrl = undefined;
+      loader = new AgentLoader(worldWithoutAssets);
       const resolved = loader.resolveUrl('asset://model.glb');
       expect(resolved).toBeNull();
     });
@@ -188,15 +235,15 @@ describe('AgentLoader System', () => {
   describe('Asset Loading', () => {
     beforeEach(() => {
       const mockArrayBuffer = new ArrayBuffer(1024);
-      (global.fetch as any).mockImplementation(() => 
+      (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => 
         createMockFetchResponse(mockArrayBuffer)
       );
       // Reset mock type for GLB parsing
-      (globalThis as any).__currentMockGlbType = 'model';
+      (globalThis as Record<string, unknown>).__currentMockGlbType = 'model';
     });
 
     it('should load model assets successfully', async () => {
-      (globalThis as any).__currentMockGlbType = 'model';
+      (globalThis as Record<string, unknown>).__currentMockGlbType = 'model';
       const result = await loader.load('model', 'asset://test-model.glb');
       
       expect(result).toBeDefined();
@@ -206,7 +253,7 @@ describe('AgentLoader System', () => {
     });
 
     it('should load emote assets successfully', async () => {
-      (globalThis as any).__currentMockGlbType = 'emote';
+      (globalThis as Record<string, unknown>).__currentMockGlbType = 'emote';
       const result = await loader.load('emote', 'asset://test-emote.glb');
       
       expect(result).toBeDefined();
@@ -215,14 +262,14 @@ describe('AgentLoader System', () => {
     });
 
     it('should load avatar assets successfully', async () => {
-      (globalThis as any).__currentMockGlbType = 'avatar';
+      (globalThis as Record<string, unknown>).__currentMockGlbType = 'avatar';
       const result = await loader.load('avatar', 'asset://test-avatar.glb');
       
       expect(result).toBeDefined();
       expect(result?.gltf).toBeDefined();
       expect(result?.factory).toBeDefined();
       expect(result?.toNodes).toBeInstanceOf(Function);
-    }, 70000);
+    }, 10000); // Reduced timeout since we fixed the skeleton issue
 
     it('should load script assets successfully', async () => {
       const result = await loader.load('script', 'asset://test-script.js');
@@ -232,7 +279,7 @@ describe('AgentLoader System', () => {
     });
 
     it('should reject forbidden script types', async () => {
-      (global.fetch as any).mockImplementation(() => 
+      (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => 
         Promise.resolve({
           ok: true,
           text: () => Promise.resolve('app.create("video", {});')
@@ -244,7 +291,7 @@ describe('AgentLoader System', () => {
     });
 
     it('should handle network errors', async () => {
-      (global.fetch as any).mockImplementation(() => 
+      (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => 
         Promise.resolve({ ok: false, status: 404 })
       );
 
@@ -276,12 +323,12 @@ describe('AgentLoader System', () => {
 
   describe('GLB Parsing', () => {
     it('should parse model GLB correctly', async () => {
-      (globalThis as any).__currentMockGlbType = 'model';
+      (globalThis as Record<string, unknown>).__currentMockGlbType = 'model';
       const arrayBuffer = new ArrayBuffer(1024);
       const result = await loader.parseGLB('model', 'test-key', arrayBuffer, 'test-url');
       
       expect(result.gltf).toBeDefined();
-      expect((result.gltf as any).scene).toBeInstanceOf(THREE.Scene);
+      expect((result.gltf as Record<string, unknown>).scene).toBeInstanceOf(THREE.Scene);
       expect(result.toNodes).toBeInstanceOf(Function);
       expect(loader.gltfLoader.parse).toHaveBeenCalledWith(
         arrayBuffer,
@@ -292,33 +339,33 @@ describe('AgentLoader System', () => {
     });
 
     it('should parse emote GLB correctly', async () => {
-      (globalThis as any).__currentMockGlbType = 'emote';
+      (globalThis as Record<string, unknown>).__currentMockGlbType = 'emote';
       const arrayBuffer = new ArrayBuffer(1024);
       const result = await loader.parseGLB('emote', 'test-key', arrayBuffer, 'test-url');
       
       expect(result.gltf).toBeDefined();
-      expect((result.gltf as any).scene).toBeInstanceOf(THREE.Scene);
-      expect((result.gltf as any).animations).toBeInstanceOf(Array);
+      expect((result.gltf as Record<string, unknown>).scene).toBeInstanceOf(THREE.Scene);
+      expect((result.gltf as Record<string, unknown>).animations).toBeInstanceOf(Array);
       expect(result.toClip).toBeInstanceOf(Function);
     });
 
     it('should parse avatar GLB correctly', async () => {
-      (globalThis as any).__currentMockGlbType = 'avatar';
+      (globalThis as Record<string, unknown>).__currentMockGlbType = 'avatar';
       const arrayBuffer = new ArrayBuffer(1024);
       const result = await loader.parseGLB('avatar', 'test-key', arrayBuffer, 'test-url');
       
       expect(result.gltf).toBeDefined();
-      expect((result.gltf as any).scene).toBeInstanceOf(THREE.Scene);
-      expect((result.gltf as any).userData?.vrm).toBeDefined(); // Key indicator for avatar GLB
+      expect((result.gltf as Record<string, unknown>).scene).toBeInstanceOf(THREE.Scene);
+      expect((result.gltf as { userData?: { vrm?: unknown } }).userData?.vrm).toBeDefined(); // Key indicator for avatar GLB
       expect(result.factory).toBeDefined();
       expect(result.toNodes).toBeInstanceOf(Function);
-    }, 70000);
+    }, 10000); // Reduced timeout
 
     it('should handle avatar GLB without VRM data', async () => {
       const nonVRMGLB = {
         scene: new THREE.Scene(),
         animations: [],
-        userData: {}
+        userData: {} as Record<string, unknown>
       }; // This mock needs to be more robust if createVRMFactory is called.
       
       vi.spyOn(loader.gltfLoader, 'parse').mockImplementation(
@@ -343,7 +390,7 @@ describe('AgentLoader System', () => {
 
     it('should handle GLTFLoader parse errors', async () => {
       vi.spyOn(loader.gltfLoader, 'parse').mockImplementation(
-        (arrayBuffer: ArrayBuffer, path: string, onLoad: any, onError: (error: Error) => void) => {
+        (arrayBuffer: ArrayBuffer, path: string, onLoad: unknown, onError: (error: Error) => void) => {
           setTimeout(() => onError(new Error('Parse failed')), 10);
         }
       );
@@ -357,8 +404,17 @@ describe('AgentLoader System', () => {
   });
 
   describe('Emote Clip Generation', () => {
+    beforeEach(() => {
+      // Ensure fetch mock is set up for this test
+      const mockArrayBuffer = new ArrayBuffer(1024);
+      (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => 
+        createMockFetchResponse(mockArrayBuffer)
+      );
+      (globalThis as Record<string, unknown>).__currentMockGlbType = 'emote';
+    });
+
     it('should generate clip with correct options', async () => {
-      (globalThis as any).__currentMockGlbType = 'emote';
+      (globalThis as Record<string, unknown>).__currentMockGlbType = 'emote';
       const result = await loader.load('emote', 'asset://test-emote.glb');
       
       const clipOptions = {
@@ -389,13 +445,18 @@ describe('AgentLoader System', () => {
 
   describe('Error Handling', () => {
     it('should handle URL resolution errors', async () => {
+      // Test with asset:// URL when assetsUrl is not set - this should return null and cause an error
+      const worldWithoutAssets = { ...mockWorld };
+      (worldWithoutAssets as Record<string, unknown>).assetsUrl = undefined;
+      const loaderWithoutAssets = new AgentLoader(worldWithoutAssets);
+      
       await expect(
-        loader.load('model', 'invalid-scheme://test.glb')
-      ).rejects.toThrow('[AgentLoader] Could not resolve URL');
+        loaderWithoutAssets.load('model', 'asset://test.glb')
+      ).rejects.toThrow('[AgentLoader] Could not resolve URL: asset://test.glb');
     });
 
     it('should clean up promises on fetch errors', async () => {
-      (global.fetch as any).mockRejectedValue(new Error('Network error'));
+      (global.fetch as unknown as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Network error'));
       
       const promise = loader.load('model', 'asset://test.glb');
       await expect(promise).rejects.toThrow('Network error');

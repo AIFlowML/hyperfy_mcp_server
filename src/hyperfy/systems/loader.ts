@@ -131,7 +131,6 @@ export class AgentLoader extends System {
   // ---------------------------
 
   resolveUrl(url: string): string | null {
-    // ... (resolveUrl implementation remains the same) ...
     if (typeof url !== "string") {
       console.error(`[AgentLoader] Invalid URL type provided: ${typeof url}`);
       return null;
@@ -162,9 +161,8 @@ export class AgentLoader extends System {
     if (this.promises.has(key)) return this.promises.get(key);
 
     const resolved = this.resolveUrl(url);
-    if (!resolved) {
-      // Explicitly reject if URL cannot be resolved
-      return Promise.reject(new Error(`[AgentLoader] Could not resolve URL: ${url}`));
+    if (resolved === null) {
+      throw new Error(`[AgentLoader] Could not resolve URL: ${url}`);
     }
 
     const promise = fetch(resolved)
@@ -244,11 +242,11 @@ export class AgentLoader extends System {
               },
             };
           } else if (type === "avatar") {
-            // Provide a default setupMaterial function for createVRMFactory
-            const setupMaterial = (material: THREE.Material) => {
-              // Default material setup - can be enhanced later
-              console.debug('[AgentLoader] Setting up material:', material.type);
-            };
+            // Use world.setupMaterial if available, otherwise provide a default
+            const worldProps = this.world as WorldWithProperties & { setupMaterial?: (material: THREE.Material) => void };
+            const setupMaterial = worldProps.setupMaterial || ((material: THREE.Material) => {
+              // Default material setup - minimal implementation
+            });
             
             const factory: VRMFactory | null = (gltf as { userData?: { vrm?: unknown } }).userData?.vrm 
               ? createVRMFactory(gltf, setupMaterial) 

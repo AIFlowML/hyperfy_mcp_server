@@ -120,8 +120,8 @@ export class EmoteManager {
     // Use type guard to safely handle unknown player data structure
     const playerData = agentPlayer.data as unknown;
     if (hasEffect(playerData)) {
-      playerData.effect = playerData.effect || {};
-      playerData.effect.emote = emoteUrl;
+    playerData.effect = playerData.effect || {};
+    playerData.effect.emote = emoteUrl;
     } else {
       console.warn("[Emote] Player data structure incompatible with effects.");
       return;

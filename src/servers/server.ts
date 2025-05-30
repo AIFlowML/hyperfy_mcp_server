@@ -138,37 +138,37 @@ async function initializeHyperfySession(): Promise<McpSessionData> {
   logger.info('Initializing Hyperfy session...');
   
   try {
-    // Dynamic import to avoid constructor issues
-    const { HyperfyService } = await import('../core/hyperfy-service.js');
-    
+  // Dynamic import to avoid constructor issues
+  const { HyperfyService } = await import('../core/hyperfy-service.js');
+  
     // Generate consistent agentId like the original plugin
     // Original pattern: runtime.agentId is created from a seed
     const agentSeed = 'hyperfy-mcp-agent';
     const baseAgentId = generateUUID({} as FastMCPRuntime, agentSeed);
-    
-    // Create a proper HyperfyRuntime object based on the real plugin implementation
-    const runtime: HyperfyRuntime = {
-      agentId: baseAgentId,
-      character: {
-        name: 'HyperfyAgent'
-      },
-      // Temporary placeholder methods - will be replaced with actual service after connection
-      getEntityById: async (entityId: string) => {
-        // Placeholder - will be replaced after service connection
-        logger.debug(`Runtime getEntityById placeholder called for: ${entityId}`);
-        return null;
-      },
-      // Temporary placeholder methods - will be replaced with actual service after connection
-      updateEntity: async (entity: unknown) => {
-        // Placeholder - will be replaced after service connection
-        logger.debug('Runtime updateEntity placeholder called', entity);
-        return;
-      }
-    };
-    
-    // Create service instance with proper runtime
-    const hyperfyService = new HyperfyService(runtime);
-    
+  
+  // Create a proper HyperfyRuntime object based on the real plugin implementation
+  const runtime: HyperfyRuntime = {
+    agentId: baseAgentId,
+    character: {
+      name: 'HyperfyAgent'
+    },
+    // Temporary placeholder methods - will be replaced with actual service after connection
+    getEntityById: async (entityId: string) => {
+      // Placeholder - will be replaced after service connection
+      logger.debug(`Runtime getEntityById placeholder called for: ${entityId}`);
+      return null;
+    },
+    // Temporary placeholder methods - will be replaced with actual service after connection
+    updateEntity: async (entity: unknown) => {
+      // Placeholder - will be replaced after service connection
+      logger.debug('Runtime updateEntity placeholder called', entity);
+      return;
+    }
+  };
+  
+  // Create service instance with proper runtime
+  const hyperfyService = new HyperfyService(runtime);
+  
     // Generate worldId using the same pattern as original plugin: agentId + '-default-hyperfy'
     const worldId = generateUUID({} as FastMCPRuntime, `${runtime.agentId}-default-hyperfy`);
     
@@ -178,88 +178,88 @@ async function initializeHyperfySession(): Promise<McpSessionData> {
       agentId: baseAgentId
     });
     
-    await hyperfyService.connect({ 
+  await hyperfyService.connect({ 
       wsUrl: SERVER_CONFIG.HYPERFY_WS_SERVER, 
-      worldId: worldId
-    });
-    
+    worldId: worldId
+  });
+  
     logger.info(`Successfully connected to Hyperfy world: ${worldId}`);
-    
-    // Get world and controls using real plugin methods
-    const world = hyperfyService.getWorld();
-    if (!world) {
+  
+  // Get world and controls using real plugin methods
+  const world = hyperfyService.getWorld();
+  if (!world) {
       throw new Error('Failed to get Hyperfy world after connection - world is null');
-    }
-    
-    // Based on plugin implementation, controls and actions are added to world
-    const controls = (world as { controls: AgentControls }).controls;
-    const actions = (world as { actions: AgentActions }).actions;
-    
+  }
+  
+  // Based on plugin implementation, controls and actions are added to world
+  const controls = (world as { controls: AgentControls }).controls;
+  const actions = (world as { actions: AgentActions }).actions;
+  
     if (!controls) {
       throw new Error('Failed to get Hyperfy controls from world - controls system not available');
     }
     
     if (!actions) {
       throw new Error('Failed to get Hyperfy actions from world - actions system not available');
-    }
+  }
 
-    // Update runtime methods to use the actual connected service
-    // This matches the real plugin implementation patterns
-    runtime.getEntityById = async (entityId: string) => {
+  // Update runtime methods to use the actual connected service
+  // This matches the real plugin implementation patterns
+  runtime.getEntityById = async (entityId: string) => {
       try {
-        // Cast the return type to match interface expectation
-        return hyperfyService.getEntityById(entityId) as unknown as Awaited<ReturnType<HyperfyRuntime['getEntityById']>>;
+    // Cast the return type to match interface expectation
+    return hyperfyService.getEntityById(entityId) as unknown as Awaited<ReturnType<HyperfyRuntime['getEntityById']>>;
       } catch (error) {
         logger.error(`Failed to get entity by ID: ${entityId}`, error);
         return null;
       }
-    };
+  };
 
-    runtime.updateEntity = async (entity: unknown) => {
+  runtime.updateEntity = async (entity: unknown) => {
       try {
-        // In the real plugin, entity updates are handled through world.network.send
-        // and entity.modify() methods
-        logger.debug('Updating entity through Hyperfy service', entity);
-        return;
+    // In the real plugin, entity updates are handled through world.network.send
+    // and entity.modify() methods
+    logger.debug('Updating entity through Hyperfy service', entity);
+    return;
       } catch (error) {
         logger.error('Failed to update entity', error);
         throw error;
       }
-    };
+  };
 
     // Generate consistent user ID using the agentId pattern
     const userId = generateUUID({} as FastMCPRuntime, `mcp-user-${baseAgentId}`);
 
-    // Build session data that satisfies Record<string, unknown> constraint
-    const sessionData: McpSessionData = {
-      worldId: worldId,
+  // Build session data that satisfies Record<string, unknown> constraint
+  const sessionData: McpSessionData = {
+    worldId: worldId,
       userId: userId,
-      playerState: {
+    playerState: {
         id: generateUUID({} as FastMCPRuntime, `player-${baseAgentId}`),
         name: 'HyperfyAgent',
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0 },
-        health: 100,
-        status: 'active',
-        lastActivity: new Date(),
-        metadata: {}
-      } as PlayerState,
-      worldState: {
-        id: worldId,
-        name: 'Hyperfy World',
-        playerCount: 1,
-        entities: [],
-        lastUpdate: new Date(),
-        metadata: {}
-      } as WorldState,
-      connectionTime: new Date(),
+      position: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, z: 0 },
+      health: 100,
+      status: 'active',
       lastActivity: new Date(),
-      preferences: {},
-      hyperfyService,
-      controls,
-      actions
-    };
-    
+      metadata: {}
+    } as PlayerState,
+    worldState: {
+      id: worldId,
+      name: 'Hyperfy World',
+      playerCount: 1,
+      entities: [],
+      lastUpdate: new Date(),
+      metadata: {}
+    } as WorldState,
+    connectionTime: new Date(),
+    lastActivity: new Date(),
+    preferences: {},
+    hyperfyService,
+    controls,
+    actions
+  };
+  
     logger.info('Hyperfy session initialized successfully', {
       worldId: sessionData.worldId,
       userId: sessionData.userId,
@@ -267,7 +267,7 @@ async function initializeHyperfySession(): Promise<McpSessionData> {
       connectionTime: sessionData.connectionTime
     });
     
-    return sessionData;
+  return sessionData;
     
   } catch (error) {
     logger.error('Failed to initialize Hyperfy session', {

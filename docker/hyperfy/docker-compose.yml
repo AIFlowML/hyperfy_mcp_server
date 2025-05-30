@@ -9,14 +9,9 @@ services:
         COMMIT_HASH: ${COMMIT_HASH:-local}
     container_name: hyperfy-local
     ports:
-      - "3069:3069"  # MCP server port
-      - "3000:3000"  # Hyperfy server port (if needed)
+      - "3000:3000"  # Hyperfy server port
     environment:
       - NODE_ENV=production
-      - HYPERFY_WS_SERVER=${HYPERFY_WS_SERVER:-wss://chill.hyperfy.xyz/ws}
-      - PORT=${PORT:-3069}
-      - DEBUG=${DEBUG:-false}
-      - MCP_DISABLE_PINGS=${MCP_DISABLE_PINGS:-false}
       - COMMIT_HASH=${COMMIT_HASH:-local}
     volumes:
       # Mount .env file if it exists
@@ -25,11 +20,9 @@ services:
       - ./logs:/app/logs
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3069/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 40s
     networks:
       - hyperfy-network
 

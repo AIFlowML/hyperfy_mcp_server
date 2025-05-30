@@ -20,7 +20,7 @@ INFO="ℹ️"
 CHECK="✅"
 GEAR="⚙️"
 
-echo -e "${BLUE}${ROCKET} Hyperfy FastMCP Server - Docker Manager${NC}"
+echo -e "${BLUE}${ROCKET} Hyperfy Server - Docker Manager${NC}"
 echo -e "${BLUE}==============================================${NC}"
 echo ""
 
@@ -62,13 +62,13 @@ else
 fi
 
 echo ""
-echo -e "${CYAN}${GEAR} Building and starting Hyperfy FastMCP Server...${NC}"
+echo -e "${CYAN}${GEAR} Building and starting Hyperfy Server...${NC}"
 
 # Start the services
 docker-compose up -d --build
 
 echo ""
-echo -e "${GREEN}${CHECK} Hyperfy FastMCP Server started successfully!${NC}"
+echo -e "${GREEN}${CHECK} Hyperfy Server started successfully!${NC}"
 echo ""
 echo -e "${INFO} Container Status:"
 docker-compose ps
@@ -82,14 +82,14 @@ echo -e "  ${CYAN}• Shell into container:${NC} docker-compose exec hyperfy-loc
 
 echo ""
 echo -e "${INFO} Health Check:"
-echo -e "  The container will be healthy when the MCP server is ready."
+echo -e "  The container will be healthy when the Hyperfy server is ready."
 echo -e "  You can check health with: ${CYAN}docker-compose ps${NC}"
 
 echo ""
 echo -e "${INFO} Connection Info:"
-echo -e "  ${CYAN}• MCP Server Port:${NC} 3069"
-echo -e "  ${CYAN}• Health Endpoint:${NC} http://localhost:3069/health"
+echo -e "  ${CYAN}• Hyperfy Server Port:${NC} 3000"
+echo -e "  ${CYAN}• Health Endpoint:${NC} http://localhost:3000/health"
 echo -e "  ${CYAN}• Container Name:${NC}  hyperfy-local"
 
 echo ""
-echo -e "${GREEN}${ROCKET} Setup complete! The Hyperfy FastMCP Server is now running.${NC}" 
+echo -e "${GREEN}${ROCKET} Setup complete! The Hyperfy Server is now running.${NC}" 

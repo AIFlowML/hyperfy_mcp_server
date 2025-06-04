@@ -23,8 +23,8 @@ A Model Context Protocol (MCP) server for interacting with Hyperfy 3D virtual wo
 
 ```bash
 # Clone and install dependencies
-git clone <repository-url>
-cd hyperfy-fastmcp-server
+git clone https://github.com/AIFlowML/hyperfy_mcp_server.git
+cd hyperfy_mcp_server
 npm install
 ```
 
@@ -244,7 +244,7 @@ Add this to your Cursor MCP settings (usually in `.cursor-server/config.json` or
     "hyperfy-mcp-server-local": {
       "command": "node",
       "args": [
-        "/path/to/your/hyperfy-fastmcp-server/dist/index.js"
+        "/path/to/your/hyperfy_mcp_server/dist/index.js"
       ],
       "env": {
         "HYPERFY_WS_SERVER": "ws://localhost:3000/ws",
@@ -269,7 +269,7 @@ Add this to your Claude Desktop MCP configuration file:
   "mcpServers": {
     "hyperfy": {
       "command": "node",
-      "args": ["/path/to/your/hyperfy-fastmcp-server/dist/index.js"],
+      "args": ["/path/to/your/hyperfy_mcp_server/dist/index.js"],
       "env": {
         "HYPERFY_WS_SERVER": "ws://localhost:3000/ws",
         "DEBUG": "false"
@@ -291,7 +291,7 @@ Add this to your `continue.json` configuration:
       "type": "mcp",
       "serverName": "hyperfy",
       "command": "node",
-      "args": ["/path/to/your/hyperfy-fastmcp-server/dist/index.js"],
+      "args": ["/path/to/your/hyperfy_mcp_server/dist/index.js"],
       "env": {
         "HYPERFY_WS_SERVER": "ws://localhost:3000/ws"
       }
@@ -306,7 +306,7 @@ For any MCP-compatible client:
 
 ```bash
 # Via stdio transport
-node /path/to/hyperfy-fastmcp-server/dist/index.js
+node /path/to/hyperfy_mcp_server/dist/index.js
 
 # With environment variables
 HYPERFY_WS_SERVER=ws://localhost:3000/ws node dist/index.js
@@ -413,7 +413,7 @@ Get comprehensive world state including entities, actions, and context.
 ## Project Structure
 
 ```
-hyperfy-fastmcp-server/
+hyperfy_mcp_server/
 ├── src/
 │   ├── servers/           # FastMCP server and tool implementations
 │   │   ├── actions/       # Individual MCP tool definitions
